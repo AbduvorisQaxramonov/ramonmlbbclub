@@ -73,6 +73,13 @@ Ramon Mobile Legends Club official website
             margin-bottom: 4px;
             border-radius: 6px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item i {
+            margin-right: 8px;
+            width: 16px;
         }
         
         .nav-item:hover {
@@ -273,6 +280,12 @@ Ramon Mobile Legends Club official website
             border-radius: 6px;
             padding: 8px 16px;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .language-btn i {
+            margin-right: 8px;
         }
         
         @media (max-width: 768px) {
@@ -285,6 +298,33 @@ Ramon Mobile Legends Club official website
                 margin-right: 0;
                 margin-bottom: 20px;
             }
+            
+            .language-selector {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin-bottom: 20px;
+                text-align: center;
+            }
+        }
+        
+        h2 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #f0f6fc;
+            padding-left: 16px;
+        }
+        
+        .status-message {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #238636;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            display: none;
         }
     </style>
 </head>
@@ -329,7 +369,7 @@ Ramon Mobile Legends Club official website
                     <div class="file-path">ramcomm@bchab / README.md</div>
                     <div class="file-actions">
                         <button class="btn"><i class="fas fa-history"></i> Tarix</button>
-                        <button class="btn btn-primary"><i class="fas fa-pencil-alt"></i> Tahrirlash</button>
+                        <button class="btn btn-primary" id="editButton"><i class="fas fa-pencil-alt"></i> Tahrirlash</button>
                     </div>
                 </div>
                 
@@ -339,7 +379,7 @@ Ramon Mobile Legends Club official website
                         <div class="tab">Ko'rib chiqish</div>
                     </div>
                     
-                    <div class="editor-text">
+                    <div class="editor-text" id="editorContent">
 <span class="comment"># ramcomm@bchab</span>
 <span class="comment">## Loyiha haqida</span>
 Bu loyiha GitHub interfeysini o'zbek tilida namoyish etadi.
@@ -362,10 +402,10 @@ Hisoa qo'shish uchus quyidagi qadamlarni bajaring:
                     
                     <div class="commit-section">
                         <div class="commit-title">O'zgarishlarni commit qilish</div>
-                        <form class="commit-form">
-                            <input type="text" class="commit-input" placeholder="Commit xabari...">
-                            <textarea class="commit-input" placeholder="Qo'shimcha tavsif (ixtiyoriy)"></textarea>
-                            <button type="submit" class="commit-button">Commit o'zgarishlar</button>
+                        <form class="commit-form" id="commitForm">
+                            <input type="text" class="commit-input" id="commitMessage" placeholder="Commit xabari...">
+                            <textarea class="commit-input" id="commitDescription" placeholder="Qo'shimcha tavsif (ixtiyoriy)"></textarea>
+                            <button type="submit" class="commit-button" id="commitButton" disabled>Commit o'zgarishlar</button>
                         </form>
                     </div>
                     
@@ -378,27 +418,38 @@ Hisoa qo'shish uchus quyidagi qadamlarni bajaring:
         </div>
     </div>
 
+    <div class="status-message" id="statusMessage"></div>
+
     <script>
         function toggleLanguage() {
-            alert("Til o'zgartirish funksiyasi bu yerda ishlaydi. Haqiqiy ilova bu funksionallikni qo'shadi.");
+            showMessage("Til o'zgartirish funksiyasi bu yerda ishlaydi. Haqiqiy ilova bu funksionallikni qo'shadi.");
+        }
+        
+        function showMessage(message) {
+            const messageElement = document.getElementById('statusMessage');
+            messageElement.textContent = message;
+            messageElement.style.display = 'block';
+            
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 3000);
         }
         
         // Commit form validation
-        const commitForm = document.querySelector('.commit-form');
-        const commitInputs = document.querySelectorAll('.commit-input');
-        const commitButton = document.querySelector('.commit-button');
+        const commitForm = document.getElementById('commitForm');
+        const commitMessage = document.getElementById('commitMessage');
+        const commitDescription = document.getElementById('commitDescription');
+        const commitButton = document.getElementById('commitButton');
         
-        commitInputs.forEach(input => {
-            input.addEventListener('input', () => {
-                const commitMessage = commitInputs[0].value.trim();
-                commitButton.disabled = !commitMessage;
-            });
+        commitMessage.addEventListener('input', () => {
+            commitButton.disabled = !commitMessage.value.trim();
         });
         
         commitForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            alert("Commit muvaffaqiyatli amalga oshirildi! (Bu demo versiya)");
-            commitInputs.forEach(input => input.value = '');
+            showMessage("Commit muvaffaqiyatli amalga oshirildi: " + commitMessage.value);
+            commitMessage.value = '';
+            commitDescription.value = '';
             commitButton.disabled = true;
         });
         
@@ -408,7 +459,35 @@ Hisoa qo'shish uchus quyidagi qadamlarni bajaring:
             tab.addEventListener('click', () => {
                 tabs.forEach(t => t.classList.remove('active'));
                 tab.classList.add('active');
+                
+                if (tab.textContent === "Ko'rib chiqish") {
+                    showMessage("Ko'rib chiqish rejimi faollashtirildi");
+                } else {
+                    showMessage("Tahrirlash rejimi faollashtirildi");
+                }
             });
+        });
+        
+        // Edit button functionality
+        const editButton = document.getElementById('editButton');
+        editButton.addEventListener('click', () => {
+            showMessage("Tahrirlash rejimi faollashtirildi. Endi fayl mazmunini o'zgartirishingiz mumkin.");
+        });
+        
+        // Navigation items functionality
+        const navItems = document.querySelectorAll('.nav-item');
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                navItems.forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                showMessage(item.textContent + " bo'limi ochildi");
+            });
+        });
+        
+        // Branch selector functionality
+        const branchSelector = document.querySelector('.branch-selector');
+        branchSelector.addEventListener('click', () => {
+            showMessage("Branch tanlash menyusi ochildi");
         });
     </script>
 </body>
